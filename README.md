@@ -2,7 +2,7 @@
 
 _Forked from the neat [streamx](https://github.com/qubole/streamx) which is in turn a fork of the awesome [kafka-connect-hdfs](https://github.com/confluentinc/kafka-connect-hdfs)_
 
-Look up Streamx [here][https://github.com/qubole/streamx]
+Look up Streamx [here](https://github.com/qubole/streamx)
 
 This fork adds support for schema-less data. Currently there is no support for Hive, esp because there is no schema ;) Streamx and kafka-connect-hdfs provide support for Avro and Parquet. The reason we need schema less is because for true IoT environments schema is not always available.
 
