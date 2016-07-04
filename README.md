@@ -1,6 +1,6 @@
 # StreamX with support for plain text data: Kafka Connect for S3
 
-_Forked from the neat [streamx][https://github.com/qubole/streamx] which is in turn a fork of the awesome [kafka-connect-hdfs](https://github.com/confluentinc/kafka-connect-hdfs)_
+_Forked from the neat [streamx](https://github.com/qubole/streamx) which is in turn a fork of the awesome [kafka-connect-hdfs](https://github.com/confluentinc/kafka-connect-hdfs)_
 
 Look up Streamx [here][https://github.com/qubole/streamx]
 
