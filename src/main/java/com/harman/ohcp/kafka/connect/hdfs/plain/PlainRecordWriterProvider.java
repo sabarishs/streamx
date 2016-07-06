@@ -11,29 +11,24 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  **/
-package io.confluent.connect.hdfs.parquet;
-
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.Path;
-import org.apache.kafka.connect.sink.SinkRecord;
-import org.apache.parquet.avro.AvroParquetWriter;
-import org.apache.parquet.hadoop.ParquetWriter;
-import org.apache.parquet.hadoop.metadata.CompressionCodecName;
+package com.harman.ohcp.kafka.connect.hdfs.plain;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.Path;
+import org.apache.kafka.connect.sink.SinkRecord;
+
 import io.confluent.connect.avro.AvroData;
-import io.confluent.connect.hdfs.RecordWriterProvider;
 import io.confluent.connect.hdfs.RecordWriter;
+import io.confluent.connect.hdfs.RecordWriterProvider;
 
-public class ParquetRecordWriterProvider implements RecordWriterProvider {
+public class PlainRecordWriterProvider implements RecordWriterProvider {
 
-  private final static String EXTENSION = ".parquet";
+  private final static String EXTENSION = ".txt";
 
   @Override
   public String getExtension() {
@@ -44,27 +39,19 @@ public class ParquetRecordWriterProvider implements RecordWriterProvider {
   public RecordWriter<SinkRecord> getRecordWriter(
       Configuration conf, final String fileName, SinkRecord record, final AvroData avroData)
       throws IOException {
-	  
-    final Schema avroSchema = avroData.fromConnectSchema(record.valueSchema());
-    CompressionCodecName compressionCodecName = CompressionCodecName.SNAPPY;
-
-    int blockSize = 256 * 1024 * 1024;
-    int pageSize = 64 * 1024;
-
     Path path = new Path(fileName);
-    final ParquetWriter<GenericRecord> writer =
-        new AvroParquetWriter<>(path, avroSchema, compressionCodecName, blockSize, pageSize);
-
+    final FSDataOutputStream out = path.getFileSystem(conf).create(path);
+    final BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
     return new RecordWriter<SinkRecord>() {
       @Override
       public void write(SinkRecord record) throws IOException {
-        Object value = avroData.fromConnectData(record.valueSchema(), record.value());
-        writer.write((GenericRecord) value);
+        bw.write(record.value().toString());
+        bw.newLine();
       }
 
       @Override
       public void close() throws IOException {
-        writer.close();
+        bw.close();
       }
     };
   }
