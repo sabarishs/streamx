@@ -1,42 +1,11 @@
-# StreamX: Kafka Connect for S3
+# StreamX with support for plain text data: Kafka Connect for S3
 
-_Forked from the awesome [kafka-connect-hdfs](https://github.com/confluentinc/kafka-connect-hdfs)_
+_Forked from the neat [streamx](https://github.com/qubole/streamx) which is in turn a fork of the awesome [kafka-connect-hdfs](https://github.com/confluentinc/kafka-connect-hdfs)_
 
-StreamX is a kafka-connect based connector to copy data from Kafka to Object Stores like Amazon s3, Google Cloud Storage and Azure Blob Store. It focusses on reliable and scalable data copying. One design goal is to write the data in format (like parquet), so that it can readily be used by analytical tools.
+Look up Streamx [here](https://github.com/qubole/streamx)
 
-##Features :
+This fork adds support for schema-less data. Currently there is no support for Hive, esp because there is no schema ;) Streamx and kafka-connect-hdfs provide support for Avro and Parquet. The reason we need schema less is because for true IoT environments schema is not always available.
 
-StreamX inherits rich set of features from kafka-connect-hdfs. 
- - Support for writing data in Avro and Parquet formats.
- - Provides Hive Integration where the connector creates patitioned hive table and periodically does add partitions once it writes a new partition to s3
- - Pluggable partitioner : 
-  - default partitioner : Each Kafka partition will have its data copied under a partition specific directory
-  - time based partitioner : Ability to write data on hourly basis
-  - field based partitioner : Ability to use a field in the record as custom partitioner
-  
-In addition to these, we have made changes to the following to make it work efficiently with s3
- - Exactly-once guarantee using WAL
- - Direct output to S3 (Avoid writing to temporary file and renaming it. In S3, rename is copy + delete which is expensive)
- - Support for storing Hive tables in Qubole's hive metastore (coming soon)
- 
-##Getting Started:
-Clone : `git clone https://github.com/qubole/streamx.git`
-
-Build : `mvn -DskipTests package`
-
-Add Connector to Connect Classpath : 
-```export CLASSPATH=$CLASSPATH:`pwd`/target/streamx-0.1.0-SNAPSHOT-development/share/java/streamx/```
-
-Run connect-distbuted in Kafka : `bin/connect-distibuted.sh config/connect-distributed.sh`
-
-### S3 Configuration
-It uses the hadoop file system implementation (s3a/s3n) to write to s3. The connect job has a configuration called _hadoop.conf.dir_ and this needs the directory where core-site.xml and other hadoop configuration resides. StreamX packages the hadoop dependencies, so it need not have hadoop project/jars in its classpath. 
-
-For quick reference, these properties must be present in your core-site.xml. This 
-- fs.AbstractFileSystem.s3.impl=org.apache.hadoop.fs.s3a.S3A
-- fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
-- fs.s3a.access.key=xxxxx
-- fs.s3a.secret.key=xxxxx
 
 ### Sample Job
 ```
@@ -44,6 +13,7 @@ For quick reference, these properties must be present in your core-site.xml. Thi
 "config":{
 "name":"twitter connector",
 "connector.class":"io.confluent.connect.hdfs.HdfsSinkConnector",
+"format.class":"com.harman.kafka.connect.hdfs.s3.PlainTextFormat",
 "tasks.max":"1",
 "flush.size":"100000",
 "hdfs.url":"<S3 location>",
@@ -54,8 +24,4 @@ For quick reference, these properties must be present in your core-site.xml. Thi
 "hadoop.conf.dir":"/usr/lib/hadoop2/etc/hadoop/",
 "topics":"twitter1p"}}
 ```
-
-##Roadmap
-- Support other object stores like Google Cloud Storage and Azure Blob Store
-- Currently, data can be written in avro/parquet format. This project will add support for more formats
-- Deal with features related to s3, like small-file consolidation
+Note the use of format.class to use PlainTextFormat
